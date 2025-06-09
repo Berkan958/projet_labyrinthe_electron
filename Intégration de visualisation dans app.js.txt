@@ -1,0 +1,87 @@
+html:
+<div id="maze-container">
+    <canvas id="maze-canvas"></canvas>
+</div>
+
+
+
+
+js:
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+
+    const canvas = document.getElementById('maze-canvas'); // Récupère le canvas
+    const ctx = canvas.getContext('2d'); // Obtient le contexte de dessin 2D
+    const CELL_SIZE = 20; // Taille de chaque cellule en pixels
+
+
+
+    function drawMaze(grid) { // C'EST LA FONCTION PRINCIPALE DE VISUALISATION
+        if (!grid || !grid.length) return;
+        const rows = grid.length;
+        const cols = grid[0].length;
+
+        canvas.width = cols * CELL_SIZE;
+        canvas.height = rows * CELL_SIZE;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                const cell = grid[y][x]; // La cellule actuelle du labyrinthe
+                ctx.beginPath();
+                
+
+                if (cell.isStart) ctx.fillStyle = 'blue';
+                else if (cell.isEnd) ctx.fillStyle = 'red';
+                else if (cell.isPath) ctx.fillStyle = 'lightgreen';
+                else if (cell.isWall) ctx.fillStyle = 'black';
+                else ctx.fillStyle = 'white'; // Passage
+
+
+                ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                
+                // Dessine les murs individuels de la cellule
+                ctx.strokeStyle = '#555'; 
+                ctx.lineWidth = 2;
+
+                if (cell.walls.top) {
+                    ctx.moveTo(x * CELL_SIZE, y * CELL_SIZE);
+                    ctx.lineTo((x + 1) * CELL_SIZE, y * CELL_SIZE);
+                }
+                if (cell.walls.right) {
+                    ctx.moveTo((x + 1) * CELL_SIZE, y * CELL_SIZE);
+                    ctx.lineTo((x + 1) * CELL_SIZE, (y + 1) * CELL_SIZE);
+                }
+                if (cell.walls.bottom) {
+                    ctx.moveTo((x + 1) * CELL_SIZE, (y + 1) * CELL_SIZE);
+                    ctx.lineTo(x * CELL_SIZE, (y + 1) * CELL_SIZE);
+                }
+                if (cell.walls.left) {
+                    ctx.moveTo(x * CELL_SIZE, (y + 1) * CELL_SIZE);
+                    ctx.lineTo(x * CELL_SIZE, y * CELL_SIZE);
+                }
+                ctx.stroke();
+            }
+        }
+    }
+    
+    function drawSolutionPath(path) {
+
+        drawMaze(currentGrid); 
+    }
+
+
+    generateBtn.addEventListener('click', () => {
+
+
+        drawMaze(currentGrid); // <<-- ICI ON UTILISE LA VISUALISATION
+
+
+    });
+    solveBtn.addEventListener('click', () => {
+        if (solutionPath) {
+            drawSolutionPath(solutionPath);
+    });
+});

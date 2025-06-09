@@ -1,0 +1,17 @@
+html:
+
+<div id="game-controls">
+    <h2>Générateur de Labyrinthe</h2>
+    <label for="maze-size">Taille :</label>
+    <select id="maze-size">
+        <option value="petite">Petite (11x11)</option>
+        <option value="moyenne" selected>Moyenne (21x21)</option>
+        <option value="grande">Grande (31x31)</option>
+    </select>
+    <br><br>
+    <button id="generate-btn">Générer Labyrinthe (DFS)</button>
+    <button id="solve-btn">Résoudre Labyrinthe (DFS)</button>
+    </div>
+
+
+

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinthe Master</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Bouton de thème -->
+    <div class="theme-toggle">
+        <button id="theme-btn" class="theme-btn">
+            <span class="theme-icon">🌙</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- ===== ÉCRAN D'AUTHENTIFICATION ===== -->
+        <div id="auth" class="tab-content active">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1 class="main-title">🎯 Labyrinthe Master</h1>
+                    <p class="subtitle">Créez, résolvez et explorez vos labyrinthes</p>
+                </div>
+
+                <!-- Formulaire de connexion -->
+                <form id="login-form" class="auth-form active">
+                    <h2>Connexion</h2>
+                    <div class="form-group">
+                        <label for="login-username">Nom d'utilisateur</label>
+                        <input type="text" id="login-username" placeholder="Entrez votre nom d'utilisateur" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Mot de passe</label>
+                        <input type="password" id="login-password" placeholder="Entrez votre mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Se connecter</button>
+                    <p class="auth-switch">
+                        Pas encore de compte ? 
+                        <a href="#" id="show-register">S'inscrire</a>
+                    </p>
+                </form>
+
+                <!-- Formulaire d'inscription -->
+                <form id="register-form" class="auth-form" style="display: none;">
+                    <h2>Inscription</h2>
+                    <div class="form-group">
+                        <label for="register-username">Nom d'utilisateur</label>
+                        <input type="text" id="register-username" placeholder="Choisissez un nom d'utilisateur" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Mot de passe</label>
+                        <input type="password" id="register-password" placeholder="Créez un mot de passe sécurisé" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm">Confirmer le mot de passe</label>
+                        <input type="password" id="register-confirm" placeholder="Confirmez votre mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">S'inscrire</button>
+                    <p class="auth-switch">
+                        Déjà un compte ? 
+                        <a href="#" id="show-login">Se connecter</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== NAVIGATION PRINCIPALE ===== -->
+        <header class="app-header" style="display: none;">
+            <div class="header-content">
+                <h1>🎯 Labyrinthe Master</h1>
+                <div class="user-info">
+                    <span id="username-display">Utilisateur</span>
+                    <button id="logout-btn" class="btn btn-outline">Déconnexion</button>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab" data-tab="dashboard">📋 Dashboard</button>
+                <button class="nav-tab" data-tab="create-labyrinth">➕ Créer</button>
+                <button class="nav-tab" data-tab="play-labyrinth">🎮 Jouer</button>
+                <button class="nav-tab" data-tab="admin" id="admin-tab-btn" style="display: none;">⚙️ Admin</button>
+            </nav>
+        </header>
+
+        <!-- ===== ÉCRAN PRINCIPAL ===== -->
+        <main class="main-content">
+            <!-- ===== DASHBOARD ===== -->
+            <section id="dashboard" class="tab-content">
+                <div class="content-header">
+                    <h2>📋 Mes Labyrinthes</h2>
+                    <div class="actions">
+                        <button id="refresh-list" class="btn btn-outline">🔄 Actualiser</button>
+                        <button class="btn btn-primary" data-tab="create-labyrinth">➕ Nouveau</button>
+                    </div>
+                </div>
+                
+                <div class="labyrinth-grid" id="labyrinth-grid">
+                    <div class="empty-state">
+                        <div class="empty-icon">🏗️</div>
+                        <h3>Aucun labyrinthe créé</h3>
+                        <p>Commencez par créer votre premier labyrinthe !</p>
+                        <button class="btn btn-primary" data-tab="create-labyrinth">Créer maintenant</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CRÉATION DE LABYRINTHE ===== -->
+            <section id="create-labyrinth" class="tab-content">
+                <div class="content-header">
+                    <h2>➕ Créer un Labyrinthe</h2>
+                </div>
+                
+                <div class="create-form-container">
+                    <form id="create-form" class="create-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="labyrinth-name">Nom du labyrinthe</label>
+                                <input type="text" id="labyrinth-name" placeholder="Mon super labyrinthe" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="labyrinth-size">Taille</label>
+                                <select id="labyrinth-size" required>
+                                    <option value="">Choisir une taille</option>
+                                    <option value="small">Petite (15x15)</option>
+                                    <option value="medium">Moyenne (25x25)</option>
+                                    <option value="large">Grande (35x35)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="labyrinth-difficulty">Difficulté (1-10)</label>
+                                <div class="difficulty-container">
+                                    <input type="range" id="labyrinth-difficulty" min="1" max="10" value="5">
+                                    <span class="difficulty-value">5</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="labyrinth-description">Description (optionnelle)</label>
+                            <textarea id="labyrinth-description" rows="3" placeholder="Une description de votre labyrinthe..."></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="generate-auto" class="btn btn-secondary">🎲 Génération Automatique</button>
+                            <button type="button" id="create-manual" class="btn btn-outline">✏️ Création Manuelle</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ===== JEU LABYRINTHE ===== -->
+            <section id="play-labyrinth" class="tab-content">
+                <div class="content-header">
+                    <h2>🎮 Jouer au Labyrinthe</h2>
+                    <div class="game-controls">
+                        <select id="select-labyrinth" class="game-select">
+                            <option value="">Choisir un labyrinthe</option>
+                        </select>
+                        <button id="solve-auto" class="btn btn-secondary">🧠 Résolution Auto</button>
+                        <button id="reset-game" class="btn btn-outline">🔄 Reset</button>
+                    </div>
+                </div>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <div class="info-item">
+                            <span class="label">Labyrinthe:</span>
+                            <span id="current-labyrinth-name">Aucun sélectionné</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Difficulté:</span>
+                            <span id="current-difficulty">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Temps:</span>
+                            <span id="game-timer">00:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="labyrinth-display" id="labyrinth-display">
+                        <div class="no-labyrinth">
+                            <div class="no-labyrinth-icon">🎯</div>
+                            <p>Sélectionnez un labyrinthe pour commencer à jouer</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== INTERFACE ADMINISTRATEUR ===== -->
+            <section id="admin" class="tab-content">
+                <div class="content-header">
+                    <h2>⚙️ Administration</h2>
+                    <div class="actions">
+                        <button id="refresh-admin" class="btn btn-outline">🔄 Actualiser</button>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3 id="total-users">0</h3>
+                            <p>Utilisateurs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏗️</div>
+                        <div class="stat-info">
+                            <h3 id="total-labyrinths">0</h3>
+                            <p>Labyrinthes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h3 id="avg-labyrinths">0</h3>
+                            <p>Moyenne/utilisateur</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestion des utilisateurs -->
+                <div class="admin-section">
+                    <h3>👥 Gestion des Utilisateurs</h3>
+                    <div class="table-container">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom d'utilisateur</th>
+                                    <th>Rôle</th>
+                                    <th>Date création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Données chargées dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Gestion des labyrinthes -->
+                <div class="admin-section">
+                    <h3>🏗️ Tous les Labyrinthes</h3>
+                    <div class="table-container">
+                        <table id="admin-labyrinths-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Créateur</th>
+                                    <th>Difficulté</th>
+                                    <th>Date création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Données chargées dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ===== MODALES ===== -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Modifier le Labyrinthe</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <div class="form-group">
+                        <label for="edit-name">Nom</label>
+                        <input type="text" id="edit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-size">Taille</label>
+                        <select id="edit-size">
+                            <option value="small">Petite (15x15)</option>
+                            <option value="medium">Moyenne (25x25)</option>
+                            <option value="large">Grande (35x35)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-difficulty">Difficulté</label>
+                        <div class="difficulty-container">
+                            <input type="range" id="edit-difficulty" min="1" max="10" value="5">
+                            <span class="difficulty-value">5</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline modal-close">Annuler</button>
+                <button type="button" id="save-edit" class="btn btn-primary">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NOTIFICATIONS ===== -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- ===== CHARGEMENT ===== -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+    </div>
+    <script src="../Labyrinth.js"></script>
+
+    <script src="app.js"></script>
+
+    <script>
+        // Basculer entre connexion et inscription
+        document.getElementById('show-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        });
+
+        document.getElementById('show-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        });
+
+        // Fonction globale pour fermer les modales
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    </script>
+</body>
+</html>
