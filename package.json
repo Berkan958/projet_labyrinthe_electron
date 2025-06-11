@@ -7,6 +7,9 @@
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-portable": "electron-builder --win portable",
+    "build-all": "electron-builder -mwl",
     "dist": "electron-builder --publish=never"
   },
   "keywords": [
@@ -15,40 +18,42 @@
     "maze",
     "game"
   ],
-  "author": "Votre Équipe",
+  "author": "Équipe Labyrinthe (Berkan, Kenza, Mayles)",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "electron": "^28.3.3",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.yourteam.labyrinth-master",
-    "productName": "Labyrinth Master",
+    "appId": "com.labyrinth.master",
+    "productName": "Labyrinthe Master",
+    "asar": false,
+    "npmRebuild": false,
+    "buildDependenciesFromSource": false,
     "directories": {
       "output": "dist"
     },
     "files": [
       "**/*",
-      "!node_modules",
-      "!dist",
-      "!.git"
+      "node_modules/**/*"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "target": "portable",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-Portable.${ext}"
     },
     "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns"
+      "target": "dmg"
     },
     "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
+      "target": "AppImage"
     }
   }
 }

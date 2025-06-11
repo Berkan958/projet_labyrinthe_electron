@@ -1,10 +1,34 @@
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const os = require('os');
 
-const db = new sqlite3.Database('./labyrinthes.db', (err) => {
+// Chemin persistent pour la base de données
+let dbPath;
+try {
+    // Essayer d'utiliser electron app si disponible
+    const { app } = require('electron');
+    dbPath = app ? path.join(app.getPath('userData'), 'labyrinthes.db') : path.join(os.homedir(), 'labyrinthe-master-data', 'labyrinthes.db');
+} catch (error) {
+    // Si electron n'est pas disponible (développement)
+    dbPath = './labyrinthes.db';
+}
+
+console.log('📁 Chemin de la base de données:', dbPath);
+
+// Créer le dossier si nécessaire
+const fs = require('fs');
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+    console.log('📂 Dossier de données créé:', dbDir);
+}
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error("Erreur de connexion à SQLite:", err.message);
     } else {
         console.log("Connexion réussie avec la base");
+        console.log("💾 Base de données sauvegardée dans:", dbPath);
 
         db.run("PRAGMA foreign_keys = ON");
 
