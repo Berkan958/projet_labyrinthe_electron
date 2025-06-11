@@ -1,4 +1,4 @@
-// preload.js
+// preload.js - Version corrigée
 const { contextBridge, ipcRenderer } = require('electron');
 
 // Exposer les APIs sécurisées au renderer
@@ -21,5 +21,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getAllUsers: () => ipcRenderer.invoke('admin:get-users'),
     getAllLabyrinths: () => ipcRenderer.invoke('admin:get-labyrinths'),
     deleteUser: (userId) => ipcRenderer.invoke('admin:delete-user', userId),
-    getStatistics: () => ipcRenderer.invoke('admin:get-stats')
+    deleteAdminLabyrinth: (labyrinthId) => ipcRenderer.invoke('admin:delete-labyrinth', labyrinthId), // ← AJOUTÉ
+    getStatistics: () => ipcRenderer.invoke('admin:get-stats'),
+    
+    // Fonctions de test temporaires
+    testCheckLabyrinth: (id) => ipcRenderer.invoke('test:check-labyrinth', id), // ← AJOUTÉ pour test
+    
+    // Fonction générique invoke pour les tests
+    invoke: (channel, data) => ipcRenderer.invoke(channel, data) // ← AJOUTÉ pour flexibilité
 });

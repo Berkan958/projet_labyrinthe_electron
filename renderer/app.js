@@ -335,6 +335,99 @@ class LabyrinthManager {
         this.gameGrid = null;
         this.playerPosition = null;
     }
+    
+    async autoPlaySolution() {
+    if (!selectedLabyrinth) {
+        notifications.warning('Veuillez sélectionner un labyrinthe');
+        return;
+    }
+    
+    console.log('🤖 Démarrage de la résolution automatique');
+    loading.show('Calcul de la solution...');
+    
+    try {
+        // 1. Obtenir la solution
+        const result = await window.electronAPI.solveLabyrinth(selectedLabyrinth.id);
+        
+        if (!result.success || !result.solution) {
+            notifications.error('Impossible de résoudre ce labyrinthe');
+            loading.hide();
+            return;
+        }
+        
+        loading.hide();
+        
+        // 2. Démarrer le jeu s'il n'est pas déjà démarré
+        if (!gameStartTime) {
+            this.startGame();
+            await new Promise(resolve => setTimeout(resolve, 500)); // Attendre que le jeu se lance
+        }
+        
+        // 3. Désactiver les contrôles manuels temporairement
+        if (this.gameKeyHandler) {
+            document.removeEventListener('keydown', this.gameKeyHandler);
+        }
+        
+        // 4. Animation de la solution
+        notifications.success('🤖 Résolution automatique en cours...');
+        
+        let stepIndex = 0;
+        const solution = result.solution;
+        
+        const animateNextStep = () => {
+            if (stepIndex >= solution.length) {
+                // Fin de l'animation
+                console.log('✅ Résolution automatique terminée');
+                this.winGame();
+                return;
+            }
+            
+            const currentStep = solution[stepIndex];
+            
+            // Vérifier si c'est la fin
+            if (this.gameGrid[currentStep.y][currentStep.x].isEnd) {
+                this.playerPosition = currentStep;
+                this.drawGameCanvas();
+                this.winGame();
+                return;
+            }
+            
+            // Déplacer le joueur
+            this.playerPosition = { x: currentStep.x, y: currentStep.y };
+            this.drawGameCanvas();
+            
+            // Afficher le numéro de l'étape
+            const canvas = document.getElementById('labyrinth-canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                const cellSize = canvas.width / this.gameGrid[0].length;
+                
+                // Afficher temporairement le numéro de l'étape
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+                ctx.font = `${Math.floor(cellSize / 3)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillText(
+                    stepIndex + 1,
+                    currentStep.x * cellSize + cellSize / 2,
+                    currentStep.y * cellSize + cellSize / 2 + 5
+                );
+            }
+            
+            stepIndex++;
+            
+            // Programmer la prochaine étape
+            setTimeout(animateNextStep, 300); // 300ms entre chaque étape
+        };
+        
+        // Démarrer l'animation
+        setTimeout(animateNextStep, 500);
+        
+    } catch (error) {
+        console.error('Erreur résolution auto:', error);
+        notifications.error('Erreur lors de la résolution automatique');
+        loading.hide();
+    }
+}
 
     initEventListeners() {
         // Génération automatique
@@ -369,7 +462,7 @@ class LabyrinthManager {
         // Résolution automatique
         document.getElementById('solve-auto')?.addEventListener('click', () => {
             if (selectedLabyrinth) {
-                this.solveLabyrinth(selectedLabyrinth.id);
+                this.autoPlaySolution();
             }
         });
 
@@ -1413,7 +1506,7 @@ class AdminManager {
         if (!confirm('Supprimer ce labyrinthe ?')) return;
 
         try {
-            const result = await window.electronAPI.deleteLabyrinth(labyrinthId);
+            const result = await window.electronAPI.deleteAdminLabyrinth(labyrinthId);
             
             if (result.success) {
                 notifications.success('Labyrinthe supprimé');

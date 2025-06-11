@@ -68,4 +68,11 @@ const db = new sqlite3.Database('./labyrinthes.db', (err) => {
     }
 });
 
+setTimeout(() => {
+    db.run("UPDATE users SET role = 'admin' WHERE username = 'berkan'", (err) => {
+        if (err) console.error("Erreur:", err);
+        else console.log("✅ berkan est maintenant admin !");
+    });
+}, 2000);
+
 module.exports = db;

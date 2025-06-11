@@ -479,6 +479,8 @@ ipcMain.handle('admin:delete-user', async (event, userId) => {
     }
 });
 
+// Dans main.js, remplacez le gestionnaire admin:delete-labyrinth par ceci :
+
 ipcMain.handle('admin:delete-labyrinth', async (event, labyrinthId) => {
     if (currentUser?.role !== 'admin') {
         console.error('❌ Accès admin refusé pour suppression labyrinthe');
@@ -486,11 +488,51 @@ ipcMain.handle('admin:delete-labyrinth', async (event, labyrinthId) => {
     }
 
     console.log('🗑️ Suppression labyrinthe (admin):', labyrinthId);
+    console.log('🔍 Type de labyrinthId:', typeof labyrinthId, labyrinthId);
 
     try {
-        await AdminService.deleteLabyrinth(labyrinthId);
-        console.log('✅ Labyrinthe supprimé (admin):', labyrinthId);
-        return { success: true };
+        // Vérifier d'abord que le labyrinthe existe
+        const existingLabyrinth = await new Promise((resolve, reject) => {
+            db.get("SELECT id, nom, user_id FROM labyrinthes WHERE id = ?", [labyrinthId], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (!existingLabyrinth) {
+            console.error('❌ Labyrinthe non trouvé avec ID:', labyrinthId);
+            return { success: false, message: "Labyrinthe non trouvé" };
+        }
+
+        console.log('✅ Labyrinthe trouvé:', existingLabyrinth);
+
+        // Utiliser AdminService pour supprimer
+        const result = await AdminService.deleteLabyrinth(labyrinthId);
+        
+        console.log('✅ Résultat AdminService:', result);
+
+        if (result.changes > 0) {
+            console.log('✅ Labyrinthe supprimé avec succès (admin):', labyrinthId);
+            
+            // Vérification post-suppression
+            const verification = await new Promise((resolve) => {
+                db.get("SELECT id FROM labyrinthes WHERE id = ?", [labyrinthId], (err, row) => {
+                    resolve(row);
+                });
+            });
+
+            if (verification) {
+                console.error('❌ PROBLÈME: Le labyrinthe existe encore après suppression!');
+                return { success: false, message: "Échec de la suppression" };
+            } else {
+                console.log('✅ Vérification: Labyrinthe bien supprimé de la base');
+                return { success: true, changes: result.changes };
+            }
+        } else {
+            console.error('❌ Aucune ligne supprimée');
+            return { success: false, message: "Aucune ligne supprimée" };
+        }
+
     } catch (error) {
         console.error('❌ Erreur suppression labyrinthe admin:', error);
         return { success: false, message: error.message };
