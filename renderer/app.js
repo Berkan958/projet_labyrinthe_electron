@@ -59,14 +59,12 @@ class NotificationManager {
 
         this.container.appendChild(notification);
 
-        // Auto-remove
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
         }, duration);
 
-        // Manual close
         notification.querySelector('.notification-close').addEventListener('click', () => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
@@ -106,19 +104,16 @@ class AuthManager {
     }
 
     initEventListeners() {
-        // Formulaire de connexion
         document.getElementById('login-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
         });
 
-        // Formulaire d'inscription
         document.getElementById('register-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleRegister();
         });
 
-        // Bouton de déconnexion
         document.getElementById('logout-btn')?.addEventListener('click', () => {
             this.handleLogout();
         });
@@ -142,7 +137,6 @@ class AuthManager {
                 currentUser = result.user;
                 notifications.success(`Bienvenue ${currentUser.username} !`);
                 
-                // Afficher le nom d'utilisateur
                 document.getElementById('username-display').textContent = currentUser.username;
                 
                 if (currentUser.role === 'admin') {
@@ -191,7 +185,6 @@ class AuthManager {
                 currentUser = result.user;
                 notifications.success('Compte créé avec succès !');
                 
-                // Afficher le nom d'utilisateur
                 document.getElementById('username-display').textContent = currentUser.username;
                 
                 navigationManager.switchTab('dashboard');
@@ -253,13 +246,11 @@ class NavigationManager {
     switchTab(tabName) {
         console.log('🔄 Changement vers l\'onglet:', tabName);
         
-        // 1. D'abord, cacher tous les onglets
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
             console.log('🔒 Masqué:', tab.id);
         });
 
-        // 2. Afficher l'onglet demandé
         const targetTab = document.getElementById(tabName);
         if (targetTab) {
             targetTab.classList.add('active');
@@ -269,7 +260,6 @@ class NavigationManager {
             return;
         }
 
-        // 3. Gérer l'affichage du header
         const header = document.querySelector('.app-header');
         if (header) {
             if (tabName === 'auth') {
@@ -281,7 +271,6 @@ class NavigationManager {
             }
         }
 
-        // 4. Gérer les boutons de navigation
         document.querySelectorAll('[data-tab]').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -291,10 +280,8 @@ class NavigationManager {
             targetBtn.classList.add('active');
         }
 
-        // 5. Mettre à jour l'état
         this.currentTab = tabName;
 
-        // 6. Actions spécifiques
         switch (tabName) {
             case 'dashboard':
                 if (window.labyrinthManager && currentUser) {
@@ -346,7 +333,6 @@ class LabyrinthManager {
     loading.show('Calcul de la solution...');
     
     try {
-        // 1. Obtenir la solution
         const result = await window.electronAPI.solveLabyrinth(selectedLabyrinth.id);
         
         if (!result.success || !result.solution) {
@@ -357,18 +343,15 @@ class LabyrinthManager {
         
         loading.hide();
         
-        // 2. Démarrer le jeu s'il n'est pas déjà démarré
         if (!gameStartTime) {
             this.startGame();
-            await new Promise(resolve => setTimeout(resolve, 500)); // Attendre que le jeu se lance
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
         
-        // 3. Désactiver les contrôles manuels temporairement
         if (this.gameKeyHandler) {
             document.removeEventListener('keydown', this.gameKeyHandler);
         }
         
-        // 4. Animation de la solution
         notifications.success('🤖 Résolution automatique en cours...');
         
         let stepIndex = 0;
@@ -384,7 +367,6 @@ class LabyrinthManager {
             
             const currentStep = solution[stepIndex];
             
-            // Vérifier si c'est la fin
             if (this.gameGrid[currentStep.y][currentStep.x].isEnd) {
                 this.playerPosition = currentStep;
                 this.drawGameCanvas();
@@ -392,17 +374,14 @@ class LabyrinthManager {
                 return;
             }
             
-            // Déplacer le joueur
             this.playerPosition = { x: currentStep.x, y: currentStep.y };
             this.drawGameCanvas();
             
-            // Afficher le numéro de l'étape
             const canvas = document.getElementById('labyrinth-canvas');
             if (canvas) {
                 const ctx = canvas.getContext('2d');
                 const cellSize = canvas.width / this.gameGrid[0].length;
                 
-                // Afficher temporairement le numéro de l'étape
                 ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
                 ctx.font = `${Math.floor(cellSize / 3)}px Arial`;
                 ctx.textAlign = 'center';
@@ -415,11 +394,9 @@ class LabyrinthManager {
             
             stepIndex++;
             
-            // Programmer la prochaine étape
-            setTimeout(animateNextStep, 300); // 300ms entre chaque étape
+            setTimeout(animateNextStep, 300);
         };
         
-        // Démarrer l'animation
         setTimeout(animateNextStep, 500);
         
     } catch (error) {
@@ -430,22 +407,18 @@ class LabyrinthManager {
 }
 
     initEventListeners() {
-        // Génération automatique
         document.getElementById('generate-auto')?.addEventListener('click', () => {
             this.generateAutoLabyrinth();
         });
 
-        // Création manuelle
         document.getElementById('create-manual')?.addEventListener('click', () => {
             this.createManualLabyrinth();
         });
 
-        // Actualiser la liste
         document.getElementById('refresh-list')?.addEventListener('click', () => {
             this.loadUserLabyrinths();
         });
 
-        // Slider de difficulté
         document.getElementById('labyrinth-difficulty')?.addEventListener('input', (e) => {
             document.querySelector('#create-labyrinth .difficulty-value').textContent = e.target.value;
         });
@@ -454,19 +427,16 @@ class LabyrinthManager {
             document.querySelector('#edit-modal .difficulty-value').textContent = e.target.value;
         });
 
-        // Sélection de labyrinthe pour jouer
         document.getElementById('select-labyrinth')?.addEventListener('change', (e) => {
             this.selectLabyrinthForGame(e.target.value);
         });
 
-        // Résolution automatique
         document.getElementById('solve-auto')?.addEventListener('click', () => {
             if (selectedLabyrinth) {
                 this.autoPlaySolution();
             }
         });
 
-        // Reset du jeu
         document.getElementById('reset-game')?.addEventListener('click', () => {
             this.resetGame();
         });
@@ -509,7 +479,6 @@ class LabyrinthManager {
                 </div>
             `;
             
-            // Re-attacher l'événement
             grid.querySelector('[data-tab]')?.addEventListener('click', (e) => {
                 navigationManager.switchTab(e.target.dataset.tab);
             });
@@ -606,12 +575,10 @@ class LabyrinthManager {
             return;
         }
 
-        // Créer une modale pour l'éditeur manuel
         this.openManualEditor(name, size, difficulty);
     }
 
     openManualEditor(name, size, difficulty) {
-        // Créer la modale d'édition
         const modal = document.createElement('div');
         modal.className = 'modal active';
         modal.id = 'manual-editor-modal';
@@ -645,10 +612,8 @@ class LabyrinthManager {
     
         document.body.appendChild(modal);
     
-        // Initialiser l'éditeur
         this.initManualEditor(name, size, difficulty);
     
-        // Gestionnaires d'événements
         modal.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.body.removeChild(modal);
@@ -665,11 +630,9 @@ class LabyrinthManager {
         const canvas = document.getElementById('manual-editor-canvas');
         const ctx = canvas.getContext('2d');
     
-        // Déterminer la taille de la grille
         const gridSize = size === 'small' ? 15 : size === 'medium' ? 25 : 35;
         const cellSize = Math.min(canvas.width / gridSize, canvas.height / gridSize);
     
-        // Créer une grille vide
         this.editorGrid = [];
         for (let y = 0; y < gridSize; y++) {
             const row = [];
@@ -686,10 +649,8 @@ class LabyrinthManager {
             this.editorGrid.push(row);
         }
     
-        // Dessiner la grille initiale
         this.drawEditorGrid();
     
-        // Ajouter les gestionnaires de clic
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
             const x = Math.floor((e.clientX - rect.left) / cellSize);
@@ -699,21 +660,18 @@ class LabyrinthManager {
                 const cell = this.editorGrid[y][x];
             
                 if (e.shiftKey) {
-                    // Placer le départ
                     this.editorGrid.forEach(row => {
                         row.forEach(c => c.isStart = false);
                     });
                     cell.isStart = true;
                     cell.isWall = false;
                 } else if (e.ctrlKey) {
-                    // Placer l'arrivée
                     this.editorGrid.forEach(row => {
                         row.forEach(c => c.isEnd = false);
                     });
                     cell.isEnd = true;
                     cell.isWall = false;
                 } else {
-                    // Basculer le mur
                     if (!cell.isStart && !cell.isEnd) {
                         cell.isWall = !cell.isWall;
                     }
@@ -736,20 +694,18 @@ class LabyrinthManager {
             for (let x = 0; x < gridSize; x++) {
                 const cell = this.editorGrid[y][x];
             
-                // Couleurs des cellules
                 if (cell.isStart) {
-                    ctx.fillStyle = '#10b981'; // Vert
+                    ctx.fillStyle = '#10b981';
                 } else if (cell.isEnd) {
-                    ctx.fillStyle = '#ef4444'; // Rouge
+                    ctx.fillStyle = '#ef4444';
                 } else if (cell.isWall) {
-                    ctx.fillStyle = '#374151'; // Gris foncé
+                    ctx.fillStyle = '#374151';
                 } else {
-                    ctx.fillStyle = '#f9fafb'; // Blanc
+                    ctx.fillStyle = '#f9fafb';
                 }
             
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             
-                // Bordures
                 ctx.strokeStyle = '#d1d5db';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
@@ -763,7 +719,6 @@ class LabyrinthManager {
             return;
         }
     
-        // Vérifier qu'il y a un départ et une arrivée
         const hasStart = this.editorGrid.some(row => row.some(cell => cell.isStart));
         const hasEnd = this.editorGrid.some(row => row.some(cell => cell.isEnd));
     
@@ -823,16 +778,13 @@ class LabyrinthManager {
         const labyrinth = currentLabyrinths.find(lab => lab.id === id);
         if (!labyrinth) return;
 
-        // Remplir le formulaire d'édition
         document.getElementById('edit-name').value = labyrinth.nom;
         document.getElementById('edit-size').value = labyrinth.taille;
         document.getElementById('edit-difficulty').value = labyrinth.difficulté;
         document.querySelector('#edit-modal .difficulty-value').textContent = labyrinth.difficulté;
 
-        // Afficher la modale
         document.getElementById('edit-modal').classList.add('active');
 
-        // Gérer la sauvegarde
         document.getElementById('save-edit').onclick = async () => {
             await this.saveLabyrinthEdit(id);
         };
@@ -887,10 +839,8 @@ class LabyrinthManager {
         document.getElementById('current-labyrinth-name').textContent = selectedLabyrinth.nom;
         document.getElementById('current-difficulty').textContent = `${selectedLabyrinth.difficulté}/10`;
         
-        // Réinitialiser le timer
         this.resetTimer();
         
-        // Créer le canvas pour afficher le labyrinthe - CORRECTION ICI
         const display = document.getElementById('labyrinth-display');
         display.innerHTML = `
             <div class="labyrinth-canvas-container">
@@ -905,9 +855,7 @@ class LabyrinthManager {
             </div>
         `;
         
-        // IMPORTANT : Attendre que le DOM soit mis à jour
         setTimeout(() => {
-            // Afficher le labyrinthe s'il a des données de grille
             if (selectedLabyrinth.grid_data) {
                 try {
                     this.gameGrid = JSON.parse(selectedLabyrinth.grid_data);
@@ -917,7 +865,6 @@ class LabyrinthManager {
                     this.generateDemoMaze();
                 }
             } else {
-                // Si pas de données de grille, en créer une pour la démo
                 this.generateDemoMaze();
             }
         }, 100);
@@ -941,7 +888,6 @@ class LabyrinthManager {
             return;
         }
 
-        // Vérifier que le canvas existe
         const canvas = document.getElementById('labyrinth-canvas');
         if (!canvas) {
             notifications.error('Erreur d\'affichage du labyrinthe');
@@ -951,10 +897,8 @@ class LabyrinthManager {
         gameStartTime = Date.now();
         this.startTimer();
         
-        // Initialiser la position du joueur
         this.playerPosition = { x: 0, y: 0 };
         
-        // S'assurer qu'on a une grille
         if (!this.gameGrid) {
             if (selectedLabyrinth.grid_data) {
                 try {
@@ -969,7 +913,6 @@ class LabyrinthManager {
         }
         
         if (this.gameGrid) {
-            // Trouver la vraie position de départ
             let startFound = false;
             for (let y = 0; y < this.gameGrid.length && !startFound; y++) {
                 for (let x = 0; x < this.gameGrid[0].length && !startFound; x++) {
@@ -981,23 +924,19 @@ class LabyrinthManager {
             }
             
             if (!startFound) {
-                // Si pas de start trouvé, mettre à 0,0
                 this.playerPosition = { x: 0, y: 0 };
                 this.gameGrid[0][0].isStart = true;
                 this.gameGrid[0][0].isWall = false;
             }
         }
         
-        // Redessiner avec le joueur
         this.drawGameCanvas();
         
-        // Afficher les instructions
         const instructions = document.querySelector('.game-instructions');
         if (instructions) {
             instructions.style.display = 'block';
         }
         
-        // Masquer le bouton commencer
         const startBtn = document.querySelector('button[onclick="labyrinthManager.startGame()"]');
         if (startBtn) {
             startBtn.style.display = 'none';
@@ -1005,10 +944,8 @@ class LabyrinthManager {
         
         notifications.success('🎮 Jeu commencé ! Utilisez les flèches pour vous déplacer');
         
-        // Ajouter les contrôles - CORRECTION ICI
         this.addGameControls();
         
-        // Focus sur le canvas pour les événements clavier
         canvas.focus();
         canvas.setAttribute('tabindex', '0');
     }
@@ -1016,15 +953,12 @@ class LabyrinthManager {
     addGameControls() {
         console.log('🎮 Ajout des contrôles de jeu');
         
-        // Supprimer les anciens gestionnaires pour éviter les doublons
         if (this.gameKeyHandler) {
             document.removeEventListener('keydown', this.gameKeyHandler);
             console.log('🗑️ Ancien gestionnaire supprimé');
         }
         
-        // Nouveau gestionnaire
         this.gameKeyHandler = (e) => {
-            // Vérifier que le jeu est actif
             if (!gameStartTime || !this.gameGrid || !this.playerPosition) {
                 console.log('❌ Jeu non actif:', { gameStartTime, hasGrid: !!this.gameGrid, hasPlayer: !!this.playerPosition });
                 return;
@@ -1068,34 +1002,28 @@ class LabyrinthManager {
             if (moved) {
                 console.log('🔄 Tentative de mouvement:', { from: this.playerPosition, to: { x: newX, y: newY } });
                 
-                // Vérifier si le mouvement est valide (pas dans un mur)
                 if (this.canMoveTo(newX, newY)) {
                     this.playerPosition.x = newX;
                     this.playerPosition.y = newY;
                     
                     console.log('✅ Mouvement réussi vers:', this.playerPosition);
                     
-                    // Redessiner le canvas
                     this.drawGameCanvas();
                     
-                    // Vérifier si le joueur a gagné
                     if (this.gameGrid[newY][newX].isEnd) {
                         console.log('🎉 Victoire !');
                         this.winGame();
                     }
                 } else {
                     console.log('❌ Mouvement bloqué - mur détecté');
-                    // Optionnel : feedback visuel ou sonore
                     notifications.warning('🚧 Mouvement bloqué !');
                 }
             }
         };
         
-        // Attacher le gestionnaire
         document.addEventListener('keydown', this.gameKeyHandler);
         console.log('✅ Gestionnaire d\'événements attaché');
         
-        // Ajouter des gestionnaires de click pour mobile/debug
         const canvas = document.getElementById('labyrinth-canvas');
         if (canvas) {
             canvas.addEventListener('click', (e) => {
@@ -1146,40 +1074,35 @@ class LabyrinthManager {
         const ctx = canvas.getContext('2d');
         const CELL_SIZE = Math.min(canvas.width / this.gameGrid[0].length, canvas.height / this.gameGrid.length);
         
-        // Redimensionner le canvas
         canvas.width = this.gameGrid[0].length * CELL_SIZE;
         canvas.height = this.gameGrid.length * CELL_SIZE;
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Dessiner la grille
         for (let y = 0; y < this.gameGrid.length; y++) {
             for (let x = 0; x < this.gameGrid[0].length; x++) {
                 const cell = this.gameGrid[y][x];
                 
-                // Couleurs des cellules
                 if (cell.isStart) {
-                    ctx.fillStyle = '#10b981'; // Vert pour le début
+                    ctx.fillStyle = '#10b981';
                 } else if (cell.isEnd) {
-                    ctx.fillStyle = '#ef4444'; // Rouge pour la fin
+                    ctx.fillStyle = '#ef4444';
                 } else if (cell.isWall) {
-                    ctx.fillStyle = '#374151'; // Gris foncé pour les murs
+                    ctx.fillStyle = '#374151';
                 } else {
-                    ctx.fillStyle = '#f9fafb'; // Blanc pour les passages
+                    ctx.fillStyle = '#f9fafb';
                 }
                 
                 ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 
-                // Bordures
                 ctx.strokeStyle = '#d1d5db';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
         }
         
-        // Dessiner le joueur SI la position existe
         if (this.playerPosition && gameStartTime) {
-            ctx.fillStyle = '#3b82f6'; // Bleu pour le joueur
+            ctx.fillStyle = '#3b82f6';
             const playerSize = CELL_SIZE * 0.6;
             
             ctx.beginPath();
@@ -1192,7 +1115,6 @@ class LabyrinthManager {
             );
             ctx.fill();
             
-            // Ajouter un contour blanc pour la visibilité
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
             ctx.stroke();
@@ -1204,7 +1126,6 @@ class LabyrinthManager {
     generateDemoMaze() {
         console.log('🎲 Génération d\'un labyrinthe de démonstration');
         
-        // Créer un labyrinthe de démonstration simple
         const size = 15;
         const demoGrid = [];
         
@@ -1214,7 +1135,7 @@ class LabyrinthManager {
                 row.push({
                     x: x,
                     y: y,
-                    isWall: Math.random() < 0.3, // 30% de chance d'être un mur
+                    isWall: Math.random() < 0.3,
                     isStart: x === 0 && y === 0,
                     isEnd: x === size - 1 && y === size - 1,
                     isPath: false,
@@ -1229,14 +1150,12 @@ class LabyrinthManager {
             demoGrid.push(row);
         }
         
-        // S'assurer que le début et la fin ne sont pas des murs
         demoGrid[0][0].isWall = false;
         demoGrid[size - 1][size - 1].isWall = false;
         
-        // Créer un chemin simple du début à la fin
         for (let i = 0; i < size - 1; i++) {
-            demoGrid[0][i].isWall = false; // Ligne horizontale en haut
-            demoGrid[i][size - 1].isWall = false; // Ligne verticale à droite
+            demoGrid[0][i].isWall = false;
+            demoGrid[i][size - 1].isWall = false;
         }
         
         this.gameGrid = demoGrid;
@@ -1244,13 +1163,11 @@ class LabyrinthManager {
     }
 
     winGame() {
-        // Arrêter le timer
         if (gameTimer) {
             clearInterval(gameTimer);
             gameTimer = null;
         }
         
-        // Supprimer les contrôles
         if (this.gameKeyHandler) {
             document.removeEventListener('keydown', this.gameKeyHandler);
             this.gameKeyHandler = null;
@@ -1258,8 +1175,6 @@ class LabyrinthManager {
         
         const finalTime = document.getElementById('game-timer').textContent;
         notifications.success(`🎉 Félicitations ! Vous avez terminé en ${finalTime} !`);
-        
-        // Afficher les boutons de fin
         const display = document.getElementById('labyrinth-display');
         const canvas = document.getElementById('labyrinth-canvas');
         
@@ -1284,13 +1199,11 @@ class LabyrinthManager {
     resetGame() {
         console.log('🔄 Reset du jeu');
         
-        // Nettoyer les gestionnaires d'événements
         if (this.gameKeyHandler) {
             document.removeEventListener('keydown', this.gameKeyHandler);
             this.gameKeyHandler = null;
         }
-        
-        // Réinitialiser les variables
+    
         if (gameTimer) {
             clearInterval(gameTimer);
             gameTimer = null;
@@ -1300,13 +1213,11 @@ class LabyrinthManager {
         this.playerPosition = null;
         this.resetTimer();
         
-        // Supprimer l'overlay de victoire s'il existe
         const overlay = document.querySelector('.win-overlay');
         if (overlay) {
             overlay.remove();
         }
         
-        // Réafficher l'interface de jeu
         if (selectedLabyrinth) {
             this.displayLabyrinthForGame();
         } else {
@@ -1338,7 +1249,6 @@ class LabyrinthManager {
     }
 
     playLabyrinth(id) {
-        // Changer d'onglet et sélectionner le labyrinthe
         navigationManager.switchTab('play-labyrinth');
         document.getElementById('select-labyrinth').value = id;
         this.selectLabyrinthForGame(id);
@@ -1351,7 +1261,6 @@ class LabyrinthManager {
             const result = await window.electronAPI.solveLabyrinth(selectedLabyrinth.id);
             
             if (result.success && result.solution) {
-                // Afficher le chemin de la solution sur le canvas
                 this.highlightSolutionPath(result.solution);
                 notifications.success('Solution affichée !');
             } else {
@@ -1371,8 +1280,7 @@ class LabyrinthManager {
         const grid = JSON.parse(selectedLabyrinth.grid_data);
         const CELL_SIZE = canvas.width / grid[0].length;
         
-        // Dessiner le chemin de solution
-        ctx.fillStyle = '#fbbf24'; // Jaune pour le chemin
+        ctx.fillStyle = '#fbbf24';
         solution.forEach(cell => {
             ctx.fillRect(cell.x * CELL_SIZE + 2, cell.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
         });
@@ -1527,7 +1435,6 @@ class AdminManager {
 
 // === INITIALISATION ===
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialiser tous les gestionnaires
     window.themeManager = new ThemeManager();
     window.notifications = new NotificationManager();
     window.loading = new LoadingManager();
@@ -1536,7 +1443,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.labyrinthManager = new LabyrinthManager();
     window.adminManager = new AdminManager();
 
-    // Vérifier si l'utilisateur est déjà connecté
     checkAutoLogin();
 });
 
@@ -1578,5 +1484,4 @@ function debugNavigation() {
     console.log('Section dashboard active:', dashboardSection ? dashboardSection.classList.contains('active') : 'non trouvé');
 }
 
-// Exposer la fonction globalement pour les tests
 window.debugNavigation = debugNavigation;
